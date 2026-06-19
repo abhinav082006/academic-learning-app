@@ -4,6 +4,11 @@ const cors = require('cors');
 const helmet = require('helmet');
 require('dotenv').config();
 
+const authRoutes = require('./routes/authRoutes');
+const classRoutes = require('./routes/classRoutes');
+const subjectRoutes = require('./routes/subjectRoutes');
+const errorHandler = require('./middleware/errorHandler');
+
 const app = express();
 
 // Middleware
@@ -31,26 +36,21 @@ app.get('/api/health', (req, res) => {
   });
 });
 
-// Error handling middleware
-app.use((err, req, res, next) => {
-  console.error(err.stack);
-  res.status(err.status || 500).json({
-    error: {
-      message: err.message || 'Internal Server Error',
-      status: err.status || 500
-    }
-  });
-});
+// API Routes
+app.use('/api/auth', authRoutes);
+app.use('/api/classes', classRoutes);
+app.use('/api/subjects', subjectRoutes);
 
 // 404 Handler
 app.use((req, res) => {
   res.status(404).json({
-    error: {
-      message: 'Route not found',
-      status: 404
-    }
+    error: 'Route not found',
+    status: 404
   });
 });
+
+// Error handling middleware
+app.use(errorHandler);
 
 // Server startup
 const PORT = process.env.PORT || 5000;
